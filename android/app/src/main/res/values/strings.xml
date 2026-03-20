@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Command Center</string>
+    <string name="title_activity_main">Command Center</string>
+    <string name="package_name">com.commandcenter.app</string>
+    <string name="custom_url_scheme">com.commandcenter.app</string>
+</resources>
