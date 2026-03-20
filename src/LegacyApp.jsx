@@ -2127,9 +2127,9 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
       {/* Account */}
       <Card style={{padding:"16px",marginBottom:12,boxSizing:"border-box"}}>
         <div style={{...T.titleS,color:M.onSurface,marginBottom:14}}>Account</div>
-        <button onClick={()=>{window.location.href="/change-password";}} style={{width:"100%",padding:"12px",marginBottom:8,background:M.surfaceCH,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onSurface,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        <a href="/change-password" style={{width:"100%",padding:"12px",marginBottom:8,background:M.surfaceCH,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onSurface,display:"flex",alignItems:"center",justifyContent:"center",gap:8,textDecoration:"none",boxSizing:"border-box"}}>
           <Ic d={ic.lock} s={16} c={M.onSurfaceV}/>Change Password
-        </button>
+        </a>
         <button onClick={()=>setShowLogout(true)} style={{width:"100%",padding:"12px",background:M.errorC,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.error,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           <Ic d={ic.back} s={16} c={M.error}/>Log Out
         </button>

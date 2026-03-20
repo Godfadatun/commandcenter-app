@@ -30,14 +30,16 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Protected app routes */}
+          {/* Protected full-screen routes (no bottom nav) */}
+          <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+
+          {/* Protected app routes with layout */}
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route path="/" element={<LegacyToday />} />
             <Route path="/week" element={<LegacyWeek />} />
             <Route path="/execute" element={<LegacyExecute />} />
             <Route path="/rails" element={<LegacyRails />} />
             <Route path="/settings" element={<LegacySettings />} />
-            <Route path="/change-password" element={<ChangePassword />} />
           </Route>
         </Routes>
       </BrowserRouter>
