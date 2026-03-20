@@ -43,9 +43,8 @@ export default function Login() {
           <div style={{marginBottom:16}}>
             <label style={{...T.labelS,color:M.onSurfaceV,display:"block",marginBottom:6,textTransform:"uppercase"}}>Email</label>
             <div style={{position:"relative"}}>
-              <Ic d={ic.mail} s={18} c={M.outline}/>
               <input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="you@example.com"
-                style={{width:"100%",padding:"12px 16px 12px 40px",borderRadius:12,border:`1px solid ${M.outlineV}`,fontFamily:font,...T.bodyM,background:M.surface,color:M.onSurface,outline:"none",boxSizing:"border-box",position:"relative"}}/>
+                style={{width:"100%",padding:"12px 16px 12px 40px",borderRadius:12,border:`1px solid ${M.outlineV}`,fontFamily:font,...T.bodyM,background:M.surface,color:M.onSurface,outline:"none",boxSizing:"border-box"}}/>
               <div style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",pointerEvents:"none"}}><Ic d={ic.mail} s={18} c={M.outline}/></div>
             </div>
           </div>
