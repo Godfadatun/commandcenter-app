@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import { M, T, font } from "../../theme/tokens";
 import { Ic, ic } from "../../components/Icon";
@@ -9,6 +9,7 @@ export default function ForgotPassword() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,9 +32,10 @@ export default function ForgotPassword() {
           <div style={{fontSize:56,marginBottom:16}}>✉️</div>
           <div style={{...T.headlineM,color:M.onSurface}}>Check your email</div>
           <div style={{...T.bodyM,color:M.onSurfaceV,marginTop:8,marginBottom:32}}>
-            If an account exists for <strong>{email}</strong>, we've sent password reset instructions.
+            If an account exists for <strong>{email}</strong>, we've sent a reset code.
           </div>
-          <Link to="/login" style={{...T.labelL,color:M.primary,textDecoration:"none"}}>Back to login</Link>
+          <button onClick={()=>navigate("/reset-password",{state:{email}})} style={{width:"100%",padding:"14px",borderRadius:16,border:"none",background:M.primary,color:M.onPrimary,...T.labelL,fontFamily:font,cursor:"pointer",marginBottom:16}}>Enter Reset Code</button>
+          <Link to="/login" style={{...T.bodyM,color:M.outline,textDecoration:"none"}}>Back to login</Link>
         </div>
       </div>
     );
