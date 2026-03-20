@@ -4,7 +4,7 @@ import { BarChart, Bar as RBar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Refe
 const load = async (k, fb) => { try { const r = await window.storage.get(k); return r ? JSON.parse(r.value) : fb; } catch { return fb; } };
 const save = async (k, v) => { try { await window.storage.set(k, JSON.stringify(v)); } catch {} };
 /* ─── PROXY API ─── */
-const PROXY = "http://localhost:3456";
+const PROXY = import.meta.env.VITE_PROXY_URL || (typeof window !== "undefined" && window.location.hostname === "localhost" ? "http://localhost:3456" : "");
 const proxyPost = async (path, body) => {
   try {
     const r = await fetch(PROXY + path, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
