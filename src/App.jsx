@@ -9,6 +9,7 @@ import Signup from "./pages/auth/Signup";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import ChangePassword from "./pages/auth/ChangePassword";
 
 // App pages — temporarily import from LegacyApp
 import LegacyApp from "./LegacyApp";
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/execute" element={<LegacyExecute />} />
             <Route path="/rails" element={<LegacyRails />} />
             <Route path="/settings" element={<LegacySettings />} />
+            <Route path="/change-password" element={<ChangePassword />} />
           </Route>
         </Routes>
       </BrowserRouter>
