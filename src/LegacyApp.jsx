@@ -1902,6 +1902,7 @@ const RailsView = ({rails,setRails,tasks}) => {
 /* ══ SETTINGS ══ */
 const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,expenses,setExpenses}) => {
   const [s,setS]=useState({...settings});
+  const [showLogout,setShowLogout]=useState(false);
   const [showGuide,setShowGuide]=useState(false);
   const [notionStatus,setNotionStatus]=useState({});
   const [proxyOk,setProxyOk]=useState(null);
@@ -2129,7 +2130,7 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
         <button onClick={()=>{window.location.href="/change-password";}} style={{width:"100%",padding:"12px",marginBottom:8,background:M.surfaceCH,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onSurface,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           <Ic d={ic.lock} s={16} c={M.onSurfaceV}/>Change Password
         </button>
-        <button onClick={()=>{if(confirm("Log out of Command Center?")){localStorage.removeItem("cc_token");localStorage.removeItem("cc_user");window.location.href="/login";}}} style={{width:"100%",padding:"12px",background:M.errorC,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.error,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        <button onClick={()=>setShowLogout(true)} style={{width:"100%",padding:"12px",background:M.errorC,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.error,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           <Ic d={ic.back} s={16} c={M.error}/>Log Out
         </button>
       </Card>
@@ -2172,6 +2173,19 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
             </div>
             <Card style={{padding:"14px",background:M.primaryC,boxSizing:"border-box",marginBottom:16}}><div style={{display:"flex",gap:8}}><span style={{fontSize:16}}>💡</span><div style={{...T.bodyS,color:M.onPrimaryC,lineHeight:1.5}}><strong>Quick tip:</strong> You only need to do this once. After entering your IDs, the app will remember them.</div></div></Card>
             <BtnFilled label="Got it!" onClick={()=>setShowGuide(false)} full/>
+          </div>
+        </div>
+      </div>}
+      {/* ═══ LOGOUT CONFIRMATION ═══ */}
+      {showLogout&&<div style={{position:"fixed",inset:0,zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+        <div onClick={()=>setShowLogout(false)} style={{position:"absolute",inset:0,background:"rgba(0,0,0,.5)"}}/>
+        <div style={{position:"relative",width:"100%",maxWidth:340,background:M.surface,borderRadius:28,padding:"32px 24px 24px",boxShadow:elev(3),textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>👋</div>
+          <div style={{...T.titleL,color:M.onSurface,marginBottom:8}}>Log out?</div>
+          <div style={{...T.bodyM,color:M.onSurfaceV,marginBottom:24}}>You'll need to sign in again to access your Command Center.</div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={()=>setShowLogout(false)} style={{flex:1,padding:"12px",borderRadius:16,border:`1.5px solid ${M.outlineV}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelL,color:M.onSurface}}>Cancel</button>
+            <button onClick={()=>{localStorage.removeItem("cc_token");localStorage.removeItem("cc_user");window.location.href="/login";}} style={{flex:1,padding:"12px",borderRadius:16,border:"none",background:M.error,cursor:"pointer",fontFamily:font,...T.labelL,color:M.onError}}>Log Out</button>
           </div>
         </div>
       </div>}
