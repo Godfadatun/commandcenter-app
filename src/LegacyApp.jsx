@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate as useLegacyNavigate } from "react-router-dom";
 import { BarChart, Bar as RBar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, LineChart, Line, ComposedChart, Area } from "recharts";
 /* ─── Storage ─── */
 const load = async (k, fb) => { try { const r = await window.storage.get(k); return r ? JSON.parse(r.value) : fb; } catch { return fb; } };
@@ -1900,7 +1901,7 @@ const RailsView = ({rails,setRails,tasks}) => {
   );
 };
 /* ══ SETTINGS ══ */
-const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,expenses,setExpenses}) => {
+const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,expenses,setExpenses,navigate}) => {
   const [s,setS]=useState({...settings});
   const [showLogout,setShowLogout]=useState(false);
   const [showGuide,setShowGuide]=useState(false);
@@ -2127,9 +2128,9 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
       {/* Account */}
       <Card style={{padding:"16px",marginBottom:12,boxSizing:"border-box"}}>
         <div style={{...T.titleS,color:M.onSurface,marginBottom:14}}>Account</div>
-        <a href="/change-password" style={{width:"100%",padding:"12px",marginBottom:8,background:M.surfaceCH,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onSurface,display:"flex",alignItems:"center",justifyContent:"center",gap:8,textDecoration:"none",boxSizing:"border-box"}}>
+        <button onClick={()=>navigate("/change-password")} style={{width:"100%",padding:"12px",marginBottom:8,background:M.surfaceCH,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onSurface,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           <Ic d={ic.lock} s={16} c={M.onSurfaceV}/>Change Password
-        </a>
+        </button>
         <button onClick={()=>setShowLogout(true)} style={{width:"100%",padding:"12px",background:M.errorC,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.error,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           <Ic d={ic.back} s={16} c={M.error}/>Log Out
         </button>
@@ -2185,7 +2186,7 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
           <div style={{...T.bodyM,color:M.onSurfaceV,marginBottom:24}}>You'll need to sign in again to access your Command Center.</div>
           <div style={{display:"flex",gap:10}}>
             <button onClick={()=>setShowLogout(false)} style={{flex:1,padding:"12px",borderRadius:16,border:`1.5px solid ${M.outlineV}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelL,color:M.onSurface}}>Cancel</button>
-            <button onClick={()=>{localStorage.removeItem("cc_token");localStorage.removeItem("cc_user");window.location.href="/login";}} style={{flex:1,padding:"12px",borderRadius:16,border:"none",background:M.error,cursor:"pointer",fontFamily:font,...T.labelL,color:M.onError}}>Log Out</button>
+            <button onClick={()=>{localStorage.removeItem("cc_token");localStorage.removeItem("cc_user");navigate("/login");}} style={{flex:1,padding:"12px",borderRadius:16,border:"none",background:M.error,cursor:"pointer",fontFamily:font,...T.labelL,color:M.onError}}>Log Out</button>
           </div>
         </div>
       </div>}
@@ -2197,6 +2198,7 @@ export default function App({ forcedTab }) {
   const [tab,setTab]=useState(forcedTab||"today"),[days,setDays]=useState(PRELOADED_DAYS),[tasks,setTasks]=useState(PRELOADED_TASKS),[rails,setRails]=useState(defaultRails),[loaded,setLoaded]=useState(false);
   // Sync tab with route
   useEffect(()=>{ if(forcedTab && forcedTab!==tab) setTab(forcedTab); },[forcedTab]);
+  const legacyNavigate = useLegacyNavigate();
   const [plannerOpen,setPlannerOpen]=useState(false);
   const [eodOpen,setEodOpen]=useState(false);
   const [budget,setBudget]=useState(0);
@@ -2271,7 +2273,7 @@ export default function App({ forcedTab }) {
       {tab==="week"&&<WeekView days={days} tasks={tasks} budget={budget} setBudget={setBudget} settings={settings}/>}
       {tab==="exec"&&<ExecView tasks={tasks} setTasks={updateTaskWithNotion} rails={rails} expenses={expenses} setExpenses={updateExpensesWithNotion}/>}
       {tab==="rails"&&<RailsView rails={rails} setRails={setRails} tasks={tasks}/>}
-      {tab==="settings"&&<SettingsView settings={settings} setSettings={setSettings} onBack={()=>setTab("today")} tasks={tasks} setTasks={setTasks} days={days} setDays={setDays} expenses={expenses} setExpenses={setExpenses}/>}
+      {tab==="settings"&&<SettingsView settings={settings} setSettings={setSettings} onBack={()=>setTab("today")} tasks={tasks} setTasks={setTasks} days={days} setDays={setDays} expenses={expenses} setExpenses={setExpenses} navigate={legacyNavigate}/>}
       <NextDayPlanner open={plannerOpen} onClose={()=>setPlannerOpen(false)} tasks={tasks} setTasks={updateTaskWithNotion}/>
       <EODReview open={eodOpen} onClose={()=>setEodOpen(false)} tasks={tasks} setTasks={updateTaskWithNotion} days={days} setDays={setDays}/>
     </>
