@@ -2123,6 +2123,16 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
           </div>
         ))}
       </Card>
+      {/* Account */}
+      <Card style={{padding:"16px",marginBottom:12,boxSizing:"border-box"}}>
+        <div style={{...T.titleS,color:M.onSurface,marginBottom:14}}>Account</div>
+        <button onClick={()=>{window.location.href="/reset-password";}} style={{width:"100%",padding:"12px",marginBottom:8,background:M.surfaceCH,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onSurface,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          <Ic d={ic.lock} s={16} c={M.onSurfaceV}/>Change Password
+        </button>
+        <button onClick={()=>{if(confirm("Log out of Command Center?")){localStorage.removeItem("cc_token");localStorage.removeItem("cc_user");window.location.href="/login";}}} style={{width:"100%",padding:"12px",background:M.errorC,border:"none",borderRadius:12,cursor:"pointer",fontFamily:font,...T.labelM,color:M.error,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          <Ic d={ic.back} s={16} c={M.error}/>Log Out
+        </button>
+      </Card>
       {/* Data */}
       <Card style={{padding:"16px",boxSizing:"border-box"}}>
         <div style={{...T.titleS,color:M.onSurface,marginBottom:14}}>Data Management</div>
