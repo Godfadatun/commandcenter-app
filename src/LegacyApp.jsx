@@ -2073,7 +2073,14 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
         <div style={{display:"flex",gap:8}}>
           <button onClick={testAll} style={{flex:1,padding:"12px",borderRadius:12,border:`1.5px solid ${M.info}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelM,color:M.info}}>Test</button>
           <button onClick={syncData} disabled={syncing} style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:M.primary,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onPrimary,opacity:syncing?.5:1}}>{syncing?"Syncing...":"Sync Now"}</button>
-          <button onClick={async()=>{save("cc_settings",s);if(s.notionToken){await proxyPost("/api/notion/config",{notionToken:s.notionToken,workspaceUrl:s.notionWorkspace,tasksDbId:s.notionTasksDb,dailySummaryDbId:s.notionDailyDb,expenseDebtDbId:s.notionExpenseDb,weeklyExpenseDbId:s.notionWkExpDb});}setSyncMsg("✓ Settings saved!");setTimeout(()=>setSyncMsg(""),2000);}} style={{flex:1,padding:"12px",borderRadius:12,border:`1.5px solid ${M.tertiary}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelM,color:M.tertiary,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Ic d={ic.check} s={16} c={M.tertiary}/>Save</button>
+          <button onClick={async()=>{
+            save("cc_settings",s);
+            // Always save Notion config to backend
+            const configData = {notionToken:s.notionToken||"",workspaceUrl:s.notionWorkspace||"",tasksDbId:s.notionTasksDb||"",dailySummaryDbId:s.notionDailyDb||"",expenseDebtDbId:s.notionExpenseDb||"",weeklyExpenseDbId:s.notionWkExpDb||""};
+            const r = await proxyPost("/api/notion/config", configData);
+            if(r.error) { setSyncMsg("⚠ "+r.error); setTimeout(()=>setSyncMsg(""),3000); return; }
+            setSyncMsg("✓ Settings saved to server!"); setTimeout(()=>setSyncMsg(""),2000);
+          }} style={{flex:1,padding:"12px",borderRadius:12,border:`1.5px solid ${M.tertiary}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelM,color:M.tertiary,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Ic d={ic.check} s={16} c={M.tertiary}/>Save</button>
         </div>
       </Card>
       {/* Sync Log */}
