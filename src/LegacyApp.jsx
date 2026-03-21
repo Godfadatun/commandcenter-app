@@ -6,21 +6,27 @@ const load = async (k, fb) => { try { const r = await window.storage.get(k); ret
 const save = async (k, v) => { try { await window.storage.set(k, JSON.stringify(v)); } catch {} };
 /* ─── PROXY API ─── */
 const PROXY = import.meta.env.VITE_PROXY_URL || (typeof window !== "undefined" && window.location.hostname === "localhost" ? "http://localhost:3456" : "");
+const authHeaders = () => {
+  const h = {"Content-Type":"application/json"};
+  const token = localStorage.getItem("cc_token");
+  if (token) h["Authorization"] = `Bearer ${token}`;
+  return h;
+};
 const proxyPost = async (path, body) => {
   try {
-    const r = await fetch(PROXY + path, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const r = await fetch(PROXY + path, {method:"POST",headers:authHeaders(),body:JSON.stringify(body)});
     return await r.json();
   } catch(e) { return {ok:false, error:e.message}; }
 };
 const proxyPatch = async (path, body) => {
   try {
-    const r = await fetch(PROXY + path, {method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const r = await fetch(PROXY + path, {method:"PATCH",headers:authHeaders(),body:JSON.stringify(body)});
     return await r.json();
   } catch(e) { return {ok:false, error:e.message}; }
 };
 const proxyGet = async (path) => {
   try {
-    const r = await fetch(PROXY + path);
+    const r = await fetch(PROXY + path, {headers:authHeaders()});
     return await r.json();
   } catch(e) { return {ok:false, error:e.message}; }
 };
@@ -1915,14 +1921,15 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
   const checkProxy = async () => { const r=await proxyGet("/api/health"); setProxyOk(r.ok||false); return r; };
   const configProxy = async () => {
     if(!s.notionToken) { setSyncMsg("⚠ Enter your Notion Integration Token first"); return false; }
-    const r = await proxyPost("/api/config", {
+    const r = await proxyPost("/api/notion/config", {
       notionToken: s.notionToken,
-      tasksDb: s.notionTasksDb,
-      dailyDb: s.notionDailyDb,
-      expenseDb: s.notionExpenseDb,
-      wkExpDb: s.notionWkExpDb,
+      workspaceUrl: s.notionWorkspace,
+      tasksDbId: s.notionTasksDb,
+      dailySummaryDbId: s.notionDailyDb,
+      expenseDebtDbId: s.notionExpenseDb,
+      weeklyExpenseDbId: s.notionWkExpDb,
     });
-    if(r.ok && r.hasNotion) { setProxyOk(true); return true; }
+    if(r.ok) { setProxyOk(true); return true; }
     setSyncMsg("⚠ Could not configure proxy. Is the server running?"); return false;
   };
   const testAll = async () => {
@@ -1940,7 +1947,7 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
     }
     setSyncMsg("Querying Notion databases...");
     // Step 4: Actually query each DB via proxy → Notion API
-    const r = await proxyPost("/api/test-dbs", {});
+    const r = await proxyPost("/api/notion/test-dbs", {});
     if(r.error) {
       // Token is probably wrong
       for(const key of Object.keys(dbMap)) setNotionStatus(p=>({...p,[key]:s[dbMap[key]]?"failed":"empty"}));
@@ -1979,7 +1986,7 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
     addLog("🔄 Pulling latest from Notion via proxy...");
     setSyncMsg("Syncing from Notion...");
     try {
-      const r = await proxyPost("/api/sync", {});
+      const r = await proxyPost("/api/notion/sync", {});
       if(r.error) { addLog("⚠ "+r.error,"error"); setSyncMsg("⚠ "+r.error); setSyncing(false); return; }
       let tc=0, dc=0, ec=0;
       if(r.tasks?.length>0) {
@@ -2066,7 +2073,7 @@ const SettingsView = ({settings,setSettings,onBack,tasks,setTasks,days,setDays,e
         <div style={{display:"flex",gap:8}}>
           <button onClick={testAll} style={{flex:1,padding:"12px",borderRadius:12,border:`1.5px solid ${M.info}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelM,color:M.info}}>Test</button>
           <button onClick={syncData} disabled={syncing} style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:M.primary,cursor:"pointer",fontFamily:font,...T.labelM,color:M.onPrimary,opacity:syncing?.5:1}}>{syncing?"Syncing...":"Sync Now"}</button>
-          <button onClick={()=>{save("cc_settings",s);setSyncMsg("✓ Settings saved!");setTimeout(()=>setSyncMsg(""),2000);}} style={{flex:1,padding:"12px",borderRadius:12,border:`1.5px solid ${M.tertiary}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelM,color:M.tertiary,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Ic d={ic.check} s={16} c={M.tertiary}/>Save</button>
+          <button onClick={async()=>{save("cc_settings",s);if(s.notionToken){await proxyPost("/api/notion/config",{notionToken:s.notionToken,workspaceUrl:s.notionWorkspace,tasksDbId:s.notionTasksDb,dailySummaryDbId:s.notionDailyDb,expenseDebtDbId:s.notionExpenseDb,weeklyExpenseDbId:s.notionWkExpDb});}setSyncMsg("✓ Settings saved!");setTimeout(()=>setSyncMsg(""),2000);}} style={{flex:1,padding:"12px",borderRadius:12,border:`1.5px solid ${M.tertiary}`,background:"transparent",cursor:"pointer",fontFamily:font,...T.labelM,color:M.tertiary,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Ic d={ic.check} s={16} c={M.tertiary}/>Save</button>
         </div>
       </Card>
       {/* Sync Log */}
@@ -2209,7 +2216,7 @@ export default function App({ forcedTab }) {
   // Notion write-back
   const notionUpdateTask = (task) => {
     if(!task.notionPageId) return;
-    proxyPatch("/api/tasks/"+task.notionPageId, {
+    proxyPatch("/api/notion/tasks/"+task.notionPageId, {
       name:task.name, status:task.status, priority:task.priority, type:task.type,
       taskType:task.taskType, impactPoints:task.impactPoints, effortLevel:task.effortLevel,
       dueDate:task.dueDate, description:task.description, resultSatisfaction:task.resultSatisfaction,
@@ -2217,15 +2224,15 @@ export default function App({ forcedTab }) {
       rail:task.rail, parentTask:task.parentTask,
     });
   };
-  const notionCreateTask = async (task) => { const r = await proxyPost("/api/tasks", {name:task.name,status:task.status||"Not started",priority:task.priority,type:task.type,impactPoints:task.impactPoints,effortLevel:task.effortLevel,dueDate:task.dueDate,taskType:task.taskType}); return r.pageId || ""; };
+  const notionCreateTask = async (task) => { const r = await proxyPost("/api/notion/tasks", {name:task.name,status:task.status||"Not started",priority:task.priority,type:task.type,impactPoints:task.impactPoints,effortLevel:task.effortLevel,dueDate:task.dueDate,taskType:task.taskType}); return r.pageId || ""; };
   const notionUpdateExpense = (exp) => {
     if(!exp.notionPageId) return;
-    proxyPatch("/api/expenses/"+exp.notionPageId, {
+    proxyPatch("/api/notion/expenses/"+exp.notionPageId, {
       name:exp.name, amount:exp.amount, status:exp.status, classification:exp.classification,
       unit:exp.unit, salaryPeriod:exp.salaryPeriod, datePaid:exp.datePaid,
     });
   };
-  const notionCreateExpense = async (exp) => { const r = await proxyPost("/api/expenses", {name:exp.name,amount:exp.amount,status:exp.status||"Not Paid",classification:exp.classification||"Family",unit:exp.unit,salaryPeriod:exp.salaryPeriod,datePaid:exp.datePaid}); return r.pageId || ""; };
+  const notionCreateExpense = async (exp) => { const r = await proxyPost("/api/notion/expenses", {name:exp.name,amount:exp.amount,status:exp.status||"Not Paid",classification:exp.classification||"Family",unit:exp.unit,salaryPeriod:exp.salaryPeriod,datePaid:exp.datePaid}); return r.pageId || ""; };
   const updateTaskWithNotion = (updater) => {
     setTasks(prev => {
       const next = typeof updater==="function" ? updater(prev) : updater;
